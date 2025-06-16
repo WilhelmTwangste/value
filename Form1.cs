@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,9 +13,9 @@ using WindowsFormsApp3;
 
 namespace WindowsFormsApp2
 {
-    public partial class Form1 : Form, IUserForm
+    public partial class Form1 : Form
     {
-        private readonly demo3Entities1 db = new demo3Entities1();
+        private readonly demo3Entities2 db = new demo3Entities2();
         private int editingCardID = 0;
         private FlowLayoutPanel flowLayoutPanel1;
 
@@ -30,20 +30,6 @@ namespace WindowsFormsApp2
             LoadCards();
         }
 
-        public void Delete(int ID)
-        {
-            var result = MessageBox.Show("Удалить партнера?", "Подтверждение", MessageBoxButtons.YesNo);
-            if (result == DialogResult.Yes)
-            {
-                var user = db.Partners_.Find(ID);
-                if (user != null)
-                {
-                    db.Partners_.Remove(user);
-                    db.SaveChanges();
-                    LoadCards();
-                }
-            }
-        }
         private void InitializeFlowLayoutPanel()
         {
             flowLayoutPanel1 = new FlowLayoutPanel
@@ -60,50 +46,38 @@ namespace WindowsFormsApp2
                 MessageBox.Show("Введите название партнёра!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            if (string.IsNullOrWhiteSpace(textBox2.Text))
-            {
-                MessageBox.Show("Введите название партнёра!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+
             var newPartners = new Partners_();
-            int typeId;
-            if (int.TryParse(textBox1.Text, out typeId))
-            {
-                newPartners.IDTypePartner = typeId;
-            }
-            else
-            {
-                MessageBox.Show("Введите корректный ID типа партнёра (только числа)!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-    
-            // Создаём новый объект PARTNER
+            //int typeId;
+            //if (int.TryParse(textBox1.Text, out typeId))
+            //{
+            //    newPartners.IDTypePartner = typeId;
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Введите корректный ID типа партнёра (только числа)!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //    return;
+            //}
+
             var newPartner = new Partners_
             {
-                IDTypePartner = typeId,
+                IDTypePartner = comboBox1.SelectedIndex + 1,
                 NamePartner = textBox2.Text,
                 Director = textBox3.Text,
                 Phone = textBox4.Text,
                 Rating = textBox5.Text
             };
 
-            // Добавляем в контекст Entity Framework
             db.Partners_.Add(newPartner);
-
-            // Сохраняем изменения в базе данных
             db.SaveChanges();
-
-            // Обновляем отображение карточек в Form1
             LoadCards();
 
-            // Очищаем поля после сохранения
-            textBox1.Clear();
+            
             textBox2.Clear();
             textBox3.Clear();
             textBox4.Clear();
             textBox5.Clear();
 
-            // Передаём обновлённый список партнёров в Form2
             List<Partners_> partners = db.Partners_.ToList();
             Form2 form2 = new Form2(partners);
             form2.Show();
@@ -135,7 +109,7 @@ namespace WindowsFormsApp2
             var PARTNER = db.Partners_.Find(PARTNER_ID);
             if (PARTNER != null)
             {
-                textBox1.Text = PARTNER.IDTypePartner.ToString();
+                comboBox1.SelectedIndex = PARTNER.IDTypePartner - 1;
                 textBox2.Text = PARTNER.NamePartner;
                 textBox3.Text = PARTNER.Director;
                 textBox4.Text = PARTNER.Phone;
