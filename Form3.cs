@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,7 +12,7 @@ namespace WindowsFormsApp2
 {
     public partial class Form3 : Form
     {
-        private readonly demo3Entities1 db = new demo3Entities1(); // Контекст базы данных
+        private readonly demo3Entities2 db = new demo3Entities2(); // Контекст базы данных
         private int partnerId; // ID редактируемого партнёра
         public Form3(int partnerId)
         {
@@ -26,29 +26,22 @@ namespace WindowsFormsApp2
         }
         public void LoadPartnerData()
         {
-            try
+            var partner = db.Partners_.Find(partnerId);
+            if (partner != null)
             {
-                var partner = db.Partners_.Find(partnerId);
-                if (partner != null)
-                {
-                    textBox1.Text = partner.IDTypePartner.ToString();
-                    textBox2.Text = partner.NamePartner ?? string.Empty;
-                    textBox3.Text = partner.Director ?? string.Empty;
-                    textBox4.Text = partner.Phone ?? string.Empty;
-                    textBox5.Text = partner.Rating?.ToString() ?? string.Empty;
-                }
-                else
-                {
-                    MessageBox.Show($"Партнёр с ID {partnerId} не найден в базе данных!", "Ошибка",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
+                comboBox1.SelectedIndex = partner.IDTypePartner - 1;
+                textBox2.Text = partner.NamePartner ?? string.Empty;
+                textBox3.Text = partner.Director ?? string.Empty;
+                textBox4.Text = partner.Phone ?? string.Empty;
+                textBox5.Text = partner.Rating?.ToString() ?? string.Empty;
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show($"Ошибка при загрузке данных: {ex.Message}", "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Партнёр с ID {partnerId} не найден в базе данных!", "Ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+
         private void button1_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(textBox2.Text))
@@ -56,26 +49,21 @@ namespace WindowsFormsApp2
                 MessageBox.Show("Введите название партнёра!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            if (string.IsNullOrWhiteSpace(textBox2.Text))
-            {
-                MessageBox.Show("Введите название партнёра!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
             var newPartners = new Partners_();
-            int typeId;
-            if (int.TryParse(textBox1.Text, out typeId))
-            {
-                newPartners.IDTypePartner = typeId;
-            }
-            else
-            {
-                MessageBox.Show("Введите корректный ID типа партнёра (только числа)!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            //int typeId;
+            //if (int.TryParse(textBox1.Text, out typeId))
+            //{
+            //    newPartners.IDTypePartner = typeId;
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Введите корректный ID типа партнёра (только числа)!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //    return;
+            //}
             var partner = db.Partners_.Find(partnerId);
             if (partner != null)
             {
-                partner.IDTypePartner = typeId;
+                partner.IDTypePartner = comboBox1.SelectedIndex + 1;
                 partner.NamePartner = textBox2.Text;
                 partner.Director = textBox3.Text;
                 partner.Phone = textBox4.Text;
